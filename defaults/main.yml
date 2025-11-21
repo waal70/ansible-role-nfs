@@ -1,4 +1,9 @@
 ---
+# Example nfs_exports:
+# nfs_exports: [ "/home/public    *(rw,sync,no_root_squash)" ]
+# "/media/SCANS 172.16.10.2(rw,sync,no_subtree_check,no_root_squash)" 
+# "/media/EXPORT 172.16.10.2(rw,sync,no_subtree_check,no_root_squash)"
+
 nfs_exports: []
 
 nfs_rpcbind_state: started
