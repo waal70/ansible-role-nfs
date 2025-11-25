@@ -5,6 +5,9 @@
 # "/media/EXPORT 172.16.10.2(rw,sync,no_subtree_check,no_root_squash)"
 
 nfs_exports: []
+# Set this to true if you want to nuke possible current exports and replace with only those in nfs_exports
+# If this is false, the role will merge current exports with those in nfs_exports
+nfs_replace: false
 
 nfs_rpcbind_state: started
 nfs_rpcbind_enabled: true

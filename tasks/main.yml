@@ -6,6 +6,35 @@
 - name: Include tasks to setup
   ansible.builtin.include_tasks: setup.yml
 
+# Only perform (expensive) file reads and merging if not replacing.
+- name: Block to handle merging of export stanzas.
+  when: not nfs_replace
+  block:
+  - name: Read current entries in exports file (should it exist)
+    ansible.builtin.slurp:
+      src: /home/awaal/testports
+    register: exports_file
+    ignore_errors: yes # in case the file does not exist
+
+  - name: Set fact for current exports
+    ansible.builtin.set_fact:
+      exports_content: "{{ (exports_file['content'] | b64decode | split('\n')) | default([]) }}"
+
+  - name: Filter out comments and blank lines from current exports
+    ansible.builtin.set_fact:
+      current_exports: "{{ exports_content | reject('match', '^\\s*#') | reject('match', '^\\s*$') }}"
+  # END BLOCK
+
+- name: Merge current exports with desired exports, leaving only unique entries
+  ansible.builtin.set_fact:
+    merged_exports: "{{ (current_exports | default([]) + nfs_exports) | unique }}"
+
+- name: Display NFS exports information
+  ansible.builtin.debug:
+    msg:
+      - "Current Exports: {{ current_exports | default('No current exports or REPLACE specified') }}"
+      - "Merged Exports: {{ merged_exports }}"
+
 - name: Ensure directories to export exist
   ansible.builtin.file:
     path: "{{ item }}"
@@ -13,7 +42,7 @@
     owner: root
     group: root
     mode: '0644'
-  with_items: "{{ nfs_exports | map('split') | map('first') | unique }}"
+  with_items: "{{ merged_exports | map('split') | map('first') | unique }}"
 
 - name: Copy exports file.
   ansible.builtin.template:
@@ -24,7 +53,9 @@
     mode: 0644
   notify: reload nfs
 
-# - name: Ensure nfs is running.
-# Change to systemd
-#   service: "name={{ nfs_server_daemon }} state=started enabled=yes"
-#   when: nfs_exports|length > 0
+- name: Ensure nfs is running
+  ansible.builtin.systemd_service:
+    name: "{{ nfs_server_daemon }}"
+    state: started
+    enabled: yes
+  when: merged_exports|length > 0
