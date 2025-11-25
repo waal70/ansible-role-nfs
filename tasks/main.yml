@@ -12,7 +12,7 @@
   block:
   - name: Read current entries in exports file (should it exist)
     ansible.builtin.slurp:
-      src: /home/awaal/testports
+      src: /etc/exports
     register: exports_file
     ignore_errors: yes # in case the file does not exist
 
@@ -41,7 +41,7 @@
     state: directory
     owner: root
     group: root
-    mode: '0644'
+    mode: '0777'
   with_items: "{{ merged_exports | map('split') | map('first') | unique }}"
 
 - name: Copy exports file.
