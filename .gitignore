@@ -2,5 +2,7 @@
 */__pycache__
 *.pyc
 .cache
+.ansible
+.vscode
 
-meta/.galaxy_install_info
+.galaxy_install_info
