@@ -27,7 +27,7 @@
 
 - name: Merge current exports with desired exports, leaving only unique entries
   ansible.builtin.set_fact:
-    merged_exports: "{{ (current_exports | default([]) + nfs_exports) | unique }}"
+    merged_exports: "{{ (current_exports | default([]) + (nfs_exports | default([]))) | unique }}"
 
 - name: Display NFS exports information
   ansible.builtin.debug:
