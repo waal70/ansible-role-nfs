@@ -60,6 +60,7 @@
 - name: Ensure nfs is running
   ansible.builtin.systemd_service:
     name: "{{ nfs_server_daemon }}"
-    state: restarted
-    enabled: yes
+    state: reloaded
+    enabled: true
+    masked: false
   when: merged_exports|length > 0
