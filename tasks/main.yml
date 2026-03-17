@@ -18,7 +18,7 @@
     ansible.builtin.slurp:
       src: /etc/exports
     register: exports_file
-    ignore_errors: yes # in case the file does not exist
+    ignore_errors: true # in case the file does not exist
 
   - name: Set fact for current exports
     ansible.builtin.set_fact:
